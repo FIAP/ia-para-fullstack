@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { criarApp } from "../src/app.js";
 import { FakeAdapter } from "../src/llm/FakeAdapter.js";
 import { criarHistorico } from "../src/services/historico.js";
-import { JWT_TESTE, login, postarSSE, subir } from "./ajuda.js";
+import { JWT_TESTE, login, postarSSE, subir, redisFalso } from "./ajuda.js";
 
 // RAG falso em memória, com uma coleção por usuário (como no Chroma).
 const colecoes = {};
@@ -18,7 +18,7 @@ const logOriginal = console.log;
 
 before(async () => {
   console.log = () => {};
-  api = await subir(criarApp({ llm: fake, historico: criarHistorico({ llm: fake }), rag: ragFalso, jwtSecret: JWT_TESTE }));
+  api = await subir(criarApp({ llm: fake, historico: criarHistorico({ llm: fake }), rag: ragFalso, jwtSecret: JWT_TESTE, redis: redisFalso() }));
 });
 after(() => { console.log = logOriginal; api.server.close(); });
 

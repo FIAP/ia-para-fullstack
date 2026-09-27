@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { criarApp } from "../src/app.js";
 import { FakeAdapter } from "../src/llm/FakeAdapter.js";
 import { criarHistorico } from "../src/services/historico.js";
-import { JWT_TESTE, login, postarSSE, subir } from "./ajuda.js";
+import { JWT_TESTE, login, postarSSE, subir, redisFalso } from "./ajuda.js";
 
 // RAG falso: devolve um trecho fixo só para a coleção da Ana (u1).
 const ragFalso = {
@@ -19,7 +19,7 @@ const logOriginal = console.log;
 
 before(async () => {
   console.log = () => {};
-  api = await subir(criarApp({ llm: fake, historico: criarHistorico({ llm: fake }), rag: ragFalso, jwtSecret: JWT_TESTE }));
+  api = await subir(criarApp({ llm: fake, historico: criarHistorico({ llm: fake }), rag: ragFalso, jwtSecret: JWT_TESTE, redis: redisFalso() }));
   ana = await login(api.url, "ana@exemplo.com", "ana-demo-123");
 });
 after(() => { console.log = logOriginal; api.server.close(); });

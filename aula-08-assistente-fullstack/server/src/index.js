@@ -1,3 +1,4 @@
+import { Redis } from "ioredis";
 import OpenAI from "openai";
 import { criarApp } from "./app.js";
 import { config } from "./config.js";
@@ -19,6 +20,9 @@ const historico = criarHistorico({ llm: adapter }); // resumo sem breaker (ver A
 // Embeddings sempre com a OpenAI, mesmo se o chat usar a Anthropic (ela não tem API de embeddings).
 const rag = criarRag({ chromaUrl: config.chromaUrl, openai: new OpenAI(), embeddingModel: config.embeddingModel });
 
-criarApp({ llm, historico, rag, jwtSecret: config.jwtSecret }).listen(config.porta, () =>
+// maxRetriesPerRequest: 1 → se o Redis cair, o erro aparece rápido em vez de travar a requisição.
+const redis = new Redis(config.redisUrl, { maxRetriesPerRequest: 1 });
+
+criarApp({ llm, historico, rag, redis, jwtSecret: config.jwtSecret, rateLimitPorMinuto: config.rateLimitPorMinuto }).listen(config.porta, () =>
   console.log(`API em http://localhost:${config.porta} · ${adapter.constructor.name} (${adapter.model})`),
 );

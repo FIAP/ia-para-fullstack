@@ -29,3 +29,15 @@ export async function login(url, email, senha) {
   const { token } = await r.json();
   return { Authorization: `Bearer ${token}` };
 }
+
+// Redis falso em memória: só os comandos que usamos (INCR, EXPIRE, GET, SET).
+export function redisFalso() {
+  const dados = new Map();
+  return {
+    dados,
+    async incr(k) { const v = Number(dados.get(k) ?? 0) + 1; dados.set(k, String(v)); return v; },
+    async expire() { return 1; },
+    async get(k) { return dados.get(k) ?? null; },
+    async set(k, v) { dados.set(k, v); return "OK"; },
+  };
+}

@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { criarApp } from "../src/app.js";
 import { FakeAdapter } from "../src/llm/FakeAdapter.js";
 import { criarHistorico } from "../src/services/historico.js";
-import { JWT_TESTE, login, subir } from "./ajuda.js";
+import { JWT_TESTE, login, subir, redisFalso } from "./ajuda.js";
 
 // RAG falso: guarda os chunks em memória para o teste conferir.
 const indexados = {};
@@ -17,7 +17,7 @@ let api;
 let ana;
 before(async () => {
   const fake = new FakeAdapter();
-  api = await subir(criarApp({ llm: fake, historico: criarHistorico({ llm: fake }), rag: ragFalso, jwtSecret: JWT_TESTE }));
+  api = await subir(criarApp({ llm: fake, historico: criarHistorico({ llm: fake }), rag: ragFalso, jwtSecret: JWT_TESTE, redis: redisFalso() }));
   ana = await login(api.url, "ana@exemplo.com", "ana-demo-123");
 });
 after(() => api.server.close());
