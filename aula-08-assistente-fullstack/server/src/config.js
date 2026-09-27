@@ -13,4 +13,6 @@ export const config = {
   chromaUrl: process.env.CHROMA_URL ?? "http://localhost:8000",
   redisUrl: process.env.REDIS_URL ?? "redis://localhost:6379",
   rateLimitPorMinuto: Number(process.env.RATE_LIMIT_POR_MINUTO ?? 10),
+  // Pasta com o build do React. Em produção (Docker) o próprio Express serve o front.
+  webDir: process.env.WEB_DIR,
 };

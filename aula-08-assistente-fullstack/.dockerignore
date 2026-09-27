@@ -1,0 +1,7 @@
+# Nada disso deve ir para a imagem (tamanho e, principalmente, segredos).
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+server/test
+.git

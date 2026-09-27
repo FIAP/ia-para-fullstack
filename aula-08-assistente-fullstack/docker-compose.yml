@@ -1,5 +1,6 @@
 # Infra local: banco vetorial (Chroma) e Redis (rate limit e cache).
-# Suba com: docker compose up -d
+#   docker compose up -d                      → só Chroma + Redis (para rodar o server com npm)
+#   docker compose --profile app up --build   → Chroma + Redis + a aplicação em container
 services:
   chroma:
     image: chromadb/chroma:latest
@@ -12,6 +13,20 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
+  app:
+    profiles: ["app"]
+    build: .
+    env_file: server/.env        # segredos vêm do .env, nunca da imagem
+    environment:
+      # Dentro da rede do compose, os serviços se acham pelo nome.
+      CHROMA_URL: http://chroma:8000
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      - chroma
+      - redis
 
 volumes:
   chroma-dados:
