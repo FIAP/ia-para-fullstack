@@ -11,7 +11,7 @@ import sys
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from ferramentas import FUNCOES, TOOLS
+from ferramentas import ACOES_DE_ESCRITA, FUNCOES, TOOLS
 
 load_dotenv()
 MODELO = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")  # confira os modelos disponíveis na documentação do provedor
@@ -20,6 +20,7 @@ MAX_PASSOS = 5  # trava de segurança: sem limite, um agente confuso pode entrar
 SYSTEM = """Você é um agente de pesquisa de uma empresa.
 - Use search_web para informações atuais (cotações, notícias).
 - Use consultar_banco para dados dos clientes da empresa.
+- Use enviar_email só quando o usuário pedir explicitamente para enviar um e-mail.
 - Se souber responder sozinho (conceitos, definições), responda direto, sem ferramentas.
 Responda em português, de forma curta."""
 
@@ -33,9 +34,23 @@ def log(rotulo: str, texto: str, cor: str) -> None:
     print(f"{cor}{rotulo}:{RESET} {texto}")
 
 
+def aprovado_pelo_usuario(nome: str, args: dict) -> bool:
+    """Human-in-the-loop: mostra o rascunho da ação e pede confirmação."""
+    print(f"{AMARELO}⚠ O agente quer executar uma AÇÃO DE ESCRITA: {nome}{RESET}")
+    for campo, valor in args.items():
+        print(f"   {campo}: {valor}")
+    try:
+        return input("Aprovar? (s/n) ").strip().lower() == "s"
+    except EOFError:  # sem terminal interativo (ex.: script automático): recusa por segurança
+        return False
+
+
 def executar_ferramenta(nome: str, args: dict) -> str:
     if nome not in FUNCOES:
         return f"Erro: a ferramenta {nome} não existe."
+    if nome in ACOES_DE_ESCRITA and not aprovado_pelo_usuario(nome, args):
+        # O modelo recebe a recusa como resultado e pode ajustar a resposta.
+        return "Ação recusada pelo usuário."
     try:
         return FUNCOES[nome](**args)
     except TypeError as e:  # o modelo inventou ou esqueceu algum parâmetro

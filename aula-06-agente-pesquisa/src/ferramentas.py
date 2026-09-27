@@ -39,6 +39,22 @@ TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "enviar_email",
+            "description": "Envia um e-mail. É uma AÇÃO DE ESCRITA: só use quando o usuário pedir explicitamente.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "para": {"type": "string", "description": "E-mail do destinatário"},
+                    "assunto": {"type": "string"},
+                    "corpo": {"type": "string"},
+                },
+                "required": ["para", "assunto", "corpo"],
+            },
+        },
+    },
 ]
 
 
@@ -77,11 +93,21 @@ def consultar_banco(sql: str) -> str:
         return f"Erro no SQL: {e}"
 
 
+def enviar_email(para: str, assunto: str, corpo: str) -> str:
+    # Ação de escrita FICTÍCIA: numa aplicação real, aqui entraria o serviço de e-mail.
+    print(f"   📧 (simulação) e-mail enviado para {para}: {assunto}")
+    return f"E-mail enviado para {para}."
+
+
 # O "despachante": nome que o modelo pede → função que executamos.
 FUNCOES = {
     "search_web": search_web,
     "consultar_banco": consultar_banco,
+    "enviar_email": enviar_email,
 }
+
+# Ações que mudam algo no mundo real passam por aprovação humana antes de executar.
+ACOES_DE_ESCRITA = {"enviar_email"}
 
 
 if __name__ == "__main__":
