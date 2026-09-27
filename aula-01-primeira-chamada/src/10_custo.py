@@ -12,6 +12,8 @@ CHAMADAS_POR_DIA = 10_000  # volume esperado: troque pelo número do seu produto
 
 
 def custo(prompt_tokens, completion_tokens, modelo):
+    if modelo not in PRECOS:
+        raise SystemExit(f"Sem preço para '{modelo}': adicione em src/precos.py")
     preco_entrada, preco_saida = PRECOS[modelo]
     # Os preços são por 1 MILHÃO de tokens, por isso a divisão.
     return (prompt_tokens / 1_000_000) * preco_entrada + (completion_tokens / 1_000_000) * preco_saida
