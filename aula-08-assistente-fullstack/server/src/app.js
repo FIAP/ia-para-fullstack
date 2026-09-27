@@ -14,7 +14,7 @@ export function criarApp({ llm, historico, rag }) {
   app.use(express.json());
 
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
-  app.use("/api", rotaChat({ llm, historico }));
+  app.use("/api", rotaChat({ llm, historico, rag, auth: usuarioDemo }));
   app.use("/api", rotaDocs({ rag, auth: usuarioDemo }));
 
   return app;
