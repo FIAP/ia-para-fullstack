@@ -1,0 +1,11 @@
+# Pacotes ATUAIS do LangChain. Os imports antigos (langchain.document_loaders,
+# langchain.vectorstores...) foram descontinuados.
+langchain>=0.3
+langchain-openai>=0.2
+langchain-community>=0.3
+langchain-chroma>=0.1
+langchain-text-splitters>=0.3
+pypdf>=5.0
+python-dotenv>=1.0
+# só para gerar o PDF de exemplo
+reportlab>=4.0
