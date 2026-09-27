@@ -1,4 +1,4 @@
-"""Roda o MESMO prompt em vários provedores e compara tempo e tokens.
+"""Roda o MESMO prompt em vários provedores e compara tempo, tokens e custo.
 
 Uso:
     python src/comparar.py                              # tarefa/prompt_codigo.txt em todos
@@ -20,6 +20,8 @@ from google import genai
 from google.genai import types
 from openai import OpenAI
 from tabulate import tabulate
+
+from precos import custo
 
 load_dotenv()
 
@@ -117,7 +119,7 @@ def main():
         chamar, disponivel = PROVEDORES[nome]
         modelo = MODELOS[nome]
         if not disponivel():
-            linhas.append([nome, modelo, "pulado (sem chave / desligado)", "", ""])
+            linhas.append([nome, modelo, "pulado (sem chave / desligado)", "", "", "", ""])
             continue
 
         print(f"→ {nome} ({modelo})...", flush=True)
@@ -125,15 +127,20 @@ def main():
         try:
             texto, entrada, saida = chamar(prompt)
         except Exception as e:  # um provedor com erro não derruba a comparação inteira
-            linhas.append([nome, modelo, f"ERRO: {type(e).__name__}: {str(e)[:60]}", "", ""])
+            linhas.append([nome, modelo, f"ERRO: {type(e).__name__}: {str(e)[:60]}", "", "", "", ""])
             continue
         segundos = time.perf_counter() - inicio
 
         # Salvamos a resposta CRUA: o validar_json.py precisa ver exatamente o que veio.
         (pasta / f"{nome}.md").write_text(texto, encoding="utf-8")
-        linhas.append([nome, modelo, f"{segundos:.1f}s", entrada, saida])
+        c = custo(modelo, entrada, saida, nome)
+        # Por 1.000 chamadas o número fica legível e já dá para comparar modelos.
+        por_chamada = "sem preço (src/precos.py)" if c is None else f"{c:.6f}"
+        por_mil = "" if c is None else f"{c * 1000:.2f}"
+        linhas.append([nome, modelo, f"{segundos:.1f}s", entrada, saida, por_chamada, por_mil])
 
-    tabela = tabulate(linhas, headers=["Provedor", "Modelo", "Tempo", "Tokens entrada", "Tokens saída"],
+    tabela = tabulate(linhas, headers=["Provedor", "Modelo", "Tempo", "Tokens entrada", "Tokens saída",
+                                           "US$/chamada", "US$/1.000"],
                       tablefmt="github")
     print("\n" + tabela)
     (pasta / "resumo.md").write_text(f"# {arquivo.name}\n\n{tabela}\n", encoding="utf-8")
