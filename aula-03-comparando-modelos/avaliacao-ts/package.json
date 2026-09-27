@@ -1,0 +1,14 @@
+{
+  "name": "avaliacao-validar-cpf",
+  "private": true,
+  "description": "Roda os testes gerados por cada modelo + a suíte de referência",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.3"
+  }
+}
