@@ -57,6 +57,31 @@ describe("calcularTotal", () => {
     expect(calcularTotal(c, { tipo: "percentual", valor: 10 })).toBe(53.97);
   });
 
+  // Casos sugeridos pelo /tests do Copilot no passo 8 (veja docs/comparacao-copilot.md).
+  test("item com quantidade zero não soma nada", () => {
+    const c: Carrinho = { itens: [{ nome: "Brinde", precoUnitario: 99, quantidade: 0 }], frete: 10 };
+    expect(calcularTotal(c)).toBe(10);
+  });
+
+  test("cupom de exatamente 50% é aplicado inteiro", () => {
+    expect(calcularTotal(carrinho(80, 0), { tipo: "percentual", valor: 50 })).toBe(40);
+  });
+
+  test("cupom de 0% não altera o total", () => {
+    expect(calcularTotal(carrinho(80, 10), { tipo: "percentual", valor: 0 })).toBe(90);
+  });
+
+  test("frete grátis considera a soma de todos os itens", () => {
+    const c: Carrinho = {
+      itens: [
+        { nome: "Fone", precoUnitario: 120, quantidade: 1 },
+        { nome: "Capa", precoUnitario: 45, quantidade: 2 },
+      ],
+      frete: 25,
+    };
+    expect(calcularTotal(c, { tipo: "frete_gratis" })).toBe(210);
+  });
+
   test("valores negativos lançam RangeError", () => {
     expect(() => calcularTotal(carrinho(-1))).toThrow(RangeError);
     expect(() => calcularTotal(carrinho(10, -5))).toThrow(RangeError);
