@@ -1,0 +1,8 @@
+Extraia do texto abaixo, em JSON estrito, seguindo exatamente este schema:
+{ "nome_cliente": string,
+  "prioridade": "alta" | "media" | "baixa",
+  "next_steps": [string] }
+Não inclua explicações fora do JSON. Não use blocos de código markdown.
+
+Texto:
+{{ texto }}
