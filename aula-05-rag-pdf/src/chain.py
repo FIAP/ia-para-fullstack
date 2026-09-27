@@ -37,8 +37,10 @@ prompt = ChatPromptTemplate.from_messages([
 
 
 def formatar_contexto(docs):
-    # Junta os trechos encontrados num texto só, que vai no lugar de {context}.
-    return "\n\n".join(d.page_content for d in docs)
+    # Junta os trechos num texto só, que vai no lugar de {context}.
+    # Cada trecho leva a página de origem: é daí que o modelo tira o "Fonte: página X".
+    # page_label é o número impresso no PDF ("page" começa em 0).
+    return "\n\n".join(f"[pág. {d.metadata['page_label']}] {d.page_content}" for d in docs)
 
 
 def criar_chain(db, k=4):
