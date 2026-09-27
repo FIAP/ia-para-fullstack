@@ -5,6 +5,7 @@ import express from "express";
 export function criarApp({ llm }) {
   const app = express();
   app.use(express.json());
+  app.use(express.static("public")); // o front-end mínimo em public/index.html
 
   app.get("/health", (_req, res) => res.json({ ok: true }));
 
