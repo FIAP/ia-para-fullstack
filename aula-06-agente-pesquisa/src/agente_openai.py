@@ -1,6 +1,8 @@
 """O agente: loop de "modelo pede ferramenta → código executa → devolve resultado".
 
-Uso: python src/agente_openai.py "Quantos clientes temos em SP?"
+Uso:
+    python src/agente_openai.py "Quantos clientes temos em SP?"
+    python src/agente_openai.py          # roda as 3 perguntas de teste
 """
 import json
 import os
@@ -71,6 +73,14 @@ def executar(pergunta: str) -> str:
     return "Não consegui concluir dentro do limite de passos."
 
 
+# Três cenários de decisão: cada pergunta pede uma escolha diferente.
+PERGUNTAS_TESTE = [
+    "Qual a cotação do dólar hoje?",  # → search_web (informação atual)
+    "Quantos clientes temos em SP?",  # → consultar_banco (dado interno)
+    "O que é uma API REST?",          # → nenhuma ferramenta (conhecimento próprio)
+]
+
 if __name__ == "__main__":
-    pergunta = sys.argv[1] if len(sys.argv) > 1 else "Quantos clientes temos em SP?"
-    print(executar(pergunta))
+    for pergunta in sys.argv[1:] or PERGUNTAS_TESTE:
+        print(f"\n{'=' * 60}\nPergunta: {pergunta}")
+        executar(pergunta)
