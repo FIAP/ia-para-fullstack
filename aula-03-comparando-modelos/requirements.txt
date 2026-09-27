@@ -1,0 +1,5 @@
+openai>=1.50
+anthropic>=0.40
+google-genai>=1.0
+python-dotenv>=1.0
+tabulate>=0.9

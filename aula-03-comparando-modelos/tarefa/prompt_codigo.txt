@@ -1,0 +1,9 @@
+Crie uma função TypeScript validarCpf(cpf: string): boolean
+que aceite o CPF com ou sem máscara (ex.: "529.982.247-25" ou "52998224725").
+Regras:
+- Valide os dois dígitos verificadores.
+- CPFs com todos os dígitos iguais (ex.: 111.111.111-11) são inválidos.
+- Exporte a função com: export function validarCpf
+Inclua 5 testes com Jest, importando de "./validarCpf".
+Não use bibliotecas externas.
+Responda só com código.
