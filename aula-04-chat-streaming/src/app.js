@@ -1,9 +1,10 @@
 import express from "express";
 import { calcularCusto } from "./custo.js";
+import { criarHistorico } from "./historico.js";
 
-// O app recebe o llm por parâmetro (injeção de dependência):
+// O app recebe as dependências por parâmetro (injeção de dependência):
 // em produção passamos o adapter real; nos testes, um FakeAdapter.
-export function criarApp({ llm }) {
+export function criarApp({ llm, historico = criarHistorico({ llm }) }) {
   const app = express();
   app.use(express.json());
   app.use(express.static("public")); // o front-end mínimo em public/index.html
@@ -11,10 +12,15 @@ export function criarApp({ llm }) {
   app.get("/health", (_req, res) => res.json({ ok: true }));
 
   app.post("/chat", async (req, res) => {
-    const { messages } = req.body ?? {};
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ erro: "Envie { messages: [...] }" });
+    const { sessaoId, pergunta } = req.body ?? {};
+    if (typeof sessaoId !== "string" || !sessaoId || typeof pergunta !== "string" || !pergunta.trim()) {
+      return res.status(400).json({ erro: "Envie { sessaoId, pergunta }" });
     }
+
+    // Guardamos a pergunta no histórico da sessão e reenviamos TUDO ao modelo.
+    const messages = historico.obter(sessaoId);
+    messages.push({ role: "user", content: pergunta });
+    await historico.resumirSePreciso(messages);
 
     // Headers de Server-Sent Events: a resposta fica aberta e vai chegando aos pedaços.
     res.setHeader("Content-Type", "text/event-stream");
@@ -32,7 +38,8 @@ export function criarApp({ llm }) {
     const aoFinalizar = ({ modelo, entrada, saida }) => {
       console.log(JSON.stringify({
         evento: "chat",
-        pergunta: String(messages.at(-1)?.content ?? "").slice(0, 80),
+        sessaoId,
+        pergunta: pergunta.slice(0, 80),
         ms: Date.now() - inicio,
         modelo,
         tokens: { entrada, saida },
@@ -40,9 +47,11 @@ export function criarApp({ llm }) {
       }));
     };
 
+    let resposta = "";
     try {
       for await (const token of llm.stream(messages, { aoFinalizar })) {
         if (clienteSaiu) break;
+        resposta += token;
         // JSON.stringify protege quebras de linha dentro do token, que quebrariam o SSE.
         res.write(`data: ${JSON.stringify(token)}\n\n`);
       }
@@ -50,6 +59,9 @@ export function criarApp({ llm }) {
       console.error("Erro no stream:", erro.message);
       res.write(`data: ${JSON.stringify("\n[erro ao gerar a resposta]")}\n\n`);
     }
+    // A resposta também entra no histórico: é o que permite a próxima pergunta ter contexto.
+    if (resposta) messages.push({ role: "assistant", content: resposta });
+
     res.write("data: [DONE]\n\n");
     res.end();
   });

@@ -27,7 +27,12 @@
     const conversa = document.getElementById("conversa");
     const form = document.getElementById("form");
     const campo = document.getElementById("pergunta");
-    const messages = []; // por enquanto o histórico fica no navegador
+    // O histórico agora fica no SERVIDOR; o navegador só guarda o id da sessão.
+    let sessaoId = sessionStorage.getItem("sessaoId");
+    if (!sessaoId) {
+      sessaoId = crypto.randomUUID();
+      sessionStorage.setItem("sessaoId", sessaoId);
+    }
 
     function novaMensagem(role, texto = "") {
       const div = document.createElement("div");
@@ -65,17 +70,15 @@
       e.preventDefault();
       const pergunta = campo.value.trim();
       campo.value = "";
-      messages.push({ role: "user", content: pergunta });
       novaMensagem("user", pergunta);
       const saida = novaMensagem("assistant");
 
       const r = await fetch("/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages }),
+        body: JSON.stringify({ sessaoId, pergunta }),
       });
       await lerStream(r, (token) => { saida.textContent += token; });
-      messages.push({ role: "assistant", content: saida.textContent });
     });
   </script>
 </body>
