@@ -1,0 +1,15 @@
+# Segredos: NUNCA versionar
+.env
+.env.local
+
+# Dependências e artefatos
+node_modules/
+__pycache__/
+.venv/
+dist/
+coverage/
+
+# Dados gerados localmente
+chroma/
+*.db
+.promptfoo/
