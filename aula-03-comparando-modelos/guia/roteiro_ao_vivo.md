@@ -22,3 +22,10 @@ MODELO=chatgpt npm test
 - Crie `avaliacao-ts/respostas/chatgpt/` e salve os dois arquivos.
 - `MODELO=chatgpt npm test` → os testes do próprio modelo **e** a suíte de referência.
 - Pergunta para a turma: ele respondeu **só com código**, como pedimos?
+
+## Passo 4 · Claude
+
+- Abra https://claude.ai, conversa nova, e anote o modelo.
+- Cole o **mesmo** prompt. Anote o tempo.
+- Mostre o **Artifacts**: o código aparece num painel ao lado da conversa, pronto para copiar ou baixar.
+- Salve em `avaliacao-ts/respostas/claude/` e rode `MODELO=claude npm test`.
