@@ -1,0 +1,69 @@
+2026-09-27T15:11:23.007Z [ERROR]: Traceback (most recent call last):
+  File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 39, in <module>
+    result = call_method(script_path, method_name, *data)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 24, in call_method
+    method_to_call = getattr(script_module, method_name)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'injection_no_comentario' has no attribute 'get_var'
+2026-09-27T15:11:23.009Z [ERROR]: Traceback (most recent call last):
+  File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 39, in <module>
+    result = call_method(script_path, method_name, *data)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 24, in call_method
+    method_to_call = getattr(script_module, method_name)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'codigo_bom' has no attribute 'get_var'
+2026-09-27T15:11:23.009Z [ERROR]: Traceback (most recent call last):
+  File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 39, in <module>
+    result = call_method(script_path, method_name, *data)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 24, in call_method
+    method_to_call = getattr(script_module, method_name)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'sql_injection' has no attribute 'get_var'
+2026-09-27T15:11:23.011Z [ERROR]: Error running Python script: AttributeError: module 'sql_injection' has no attribute 'get_var'
+Stack Trace: Error: AttributeError: module 'sql_injection' has no attribute 'get_var'
+    at PythonShell.parseError (/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/python-shell/index.js:303:21)
+    at terminateIfNeeded (/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/python-shell/index.js:193:32)
+    at ChildProcess.<anonymous> (/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/python-shell/index.js:185:13)
+    at ChildProcess.emit (node:events:524:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+    --Python Traceback: --
+    File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 39, in <module>
+      result = call_method(script_path, method_name, *data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 24, in call_method
+      method_to_call = getattr(script_module, method_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-27T15:11:23.012Z [ERROR]: Error removing /var/folders/lt/n9lgq53j58l7b4pj8298k3b80000gn/T/promptfoo-python-output-json-1790521882862-04507a92a8d17.json: Error: ENOENT: no such file or directory, unlink '/var/folders/lt/n9lgq53j58l7b4pj8298k3b80000gn/T/promptfoo-python-output-json-1790521882862-04507a92a8d17.json'
+2026-09-27T15:11:23.015Z [ERROR]: Error running Python script: AttributeError: module 'injection_no_comentario' has no attribute 'get_var'
+Stack Trace: Error: AttributeError: module 'injection_no_comentario' has no attribute 'get_var'
+    at PythonShell.parseError (/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/python-shell/index.js:303:21)
+    at terminateIfNeeded (/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/python-shell/index.js:193:32)
+    at ChildProcess.<anonymous> (/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/python-shell/index.js:185:13)
+    at ChildProcess.emit (node:events:524:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+    --Python Traceback: --
+    File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 39, in <module>
+      result = call_method(script_path, method_name, *data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 24, in call_method
+      method_to_call = getattr(script_module, method_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-27T15:11:23.015Z [ERROR]: Error removing /var/folders/lt/n9lgq53j58l7b4pj8298k3b80000gn/T/promptfoo-python-output-json-1790521882866-17d4c5909f969.json: Error: ENOENT: no such file or directory, unlink '/var/folders/lt/n9lgq53j58l7b4pj8298k3b80000gn/T/promptfoo-python-output-json-1790521882866-17d4c5909f969.json'
+2026-09-27T15:11:23.017Z [ERROR]: Error running Python script: AttributeError: module 'codigo_bom' has no attribute 'get_var'
+Stack Trace: Error: AttributeError: module 'codigo_bom' has no attribute 'get_var'
+    at PythonShell.parseError (/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/python-shell/index.js:303:21)
+    at terminateIfNeeded (/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/python-shell/index.js:193:32)
+    at ChildProcess.<anonymous> (/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/python-shell/index.js:185:13)
+    at ChildProcess.emit (node:events:524:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+    --Python Traceback: --
+    File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 39, in <module>
+      result = call_method(script_path, method_name, *data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/Users/thiagoadriano/.npm/_npx/ecd30da3e6c38a01/node_modules/promptfoo/dist/src/python/wrapper.py", line 24, in call_method
+      method_to_call = getattr(script_module, method_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-27T15:11:23.017Z [ERROR]: Error removing /var/folders/lt/n9lgq53j58l7b4pj8298k3b80000gn/T/promptfoo-python-output-json-1790521882865-428ef77282c77.json: Error: ENOENT: no such file or directory, unlink '/var/folders/lt/n9lgq53j58l7b4pj8298k3b80000gn/T/promptfoo-python-output-json-1790521882865-428ef77282c77.json'
