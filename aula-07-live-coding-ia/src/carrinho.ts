@@ -60,6 +60,19 @@ function arredondarCentavos(valor: number): number {
   return Math.round(valor * 100) / 100;
 }
 
+/**
+ * Calcula o total do carrinho aplicando o cupom (se houver).
+ *
+ * Regras:
+ * - percentual: desconto sobre os produtos, limitado a 50%;
+ * - valor_fixo: desconto sobre os produtos, nunca maior que o subtotal (o frete continua sendo cobrado);
+ * - frete_gratis: zera o frete quando o subtotal dos produtos é MAIOR que R$ 200 (exatamente R$ 200 paga frete).
+ *
+ * @param carrinho Itens e frete, em reais
+ * @param cupom Cupom opcional
+ * @returns Total em reais, arredondado para centavos e nunca negativo
+ * @throws {RangeError} Se preço, quantidade, frete ou valor do cupom forem negativos
+ */
 export function calcularTotal(carrinho: Carrinho, cupom?: Cupom): number {
   validar(carrinho, cupom);
   const subtotal = calcularSubtotal(carrinho.itens);
