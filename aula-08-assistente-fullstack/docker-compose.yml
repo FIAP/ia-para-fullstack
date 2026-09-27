@@ -1,0 +1,17 @@
+# Infra local: banco vetorial (Chroma) e Redis (rate limit e cache).
+# Suba com: docker compose up -d
+services:
+  chroma:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-dados:/data   # os vetores sobrevivem a um "docker compose down"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  chroma-dados:
