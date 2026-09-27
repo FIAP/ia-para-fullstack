@@ -1,0 +1,62 @@
+[
+  {
+    "pergunta": "Qual o prazo de garantia dos produtos eletrônicos?",
+    "resposta_esperada": "12 meses (90 dias de garantia legal + 9 meses de garantia contratual).",
+    "palavras_chave": ["12 meses"],
+    "pagina": "2"
+  },
+  {
+    "pergunta": "A garantia cobre danos por queda ou contato com líquidos?",
+    "resposta_esperada": "Não. Queda e contato com líquidos não são cobertos pela garantia.",
+    "palavras_chave": ["não"],
+    "pagina": "2"
+  },
+  {
+    "pergunta": "Quantos dias eu tenho para desistir de uma compra online?",
+    "resposta_esperada": "7 dias corridos após o recebimento (direito de arrependimento).",
+    "palavras_chave": ["7 dias"],
+    "pagina": "3"
+  },
+  {
+    "pergunta": "Em quanto tempo o reembolso é feito após a devolução?",
+    "resposta_esperada": "Em até 10 dias úteis após o produto chegar ao centro de distribuição.",
+    "palavras_chave": ["10 dias"],
+    "pagina": "3"
+  },
+  {
+    "pergunta": "Qual o valor mínimo de compra para ter frete grátis no Sudeste?",
+    "resposta_esperada": "Compras acima de R$ 299,00.",
+    "palavras_chave": ["299"],
+    "pagina": "4"
+  },
+  {
+    "pergunta": "Quanto custa a entrega expressa?",
+    "resposta_esperada": "R$ 29,90, com entrega em 1 dia útil para pedidos pagos até as 14h (capitais do Sudeste).",
+    "palavras_chave": ["29,90"],
+    "pagina": "4"
+  },
+  {
+    "pergunta": "Qual o desconto para pagamento via Pix?",
+    "resposta_esperada": "5% sobre o valor dos produtos (não vale para o frete).",
+    "palavras_chave": ["5%"],
+    "pagina": "5"
+  },
+  {
+    "pergunta": "Qual o horário do chat aos sábados?",
+    "resposta_esperada": "Das 9h às 14h.",
+    "palavras_chave": ["9h", "14h"],
+    "pagina": "6"
+  },
+  {
+    "pergunta": "Quantos pontos preciso juntar para ganhar R$ 5 de desconto?",
+    "resposta_esperada": "100 pontos.",
+    "palavras_chave": ["100"],
+    "pagina": "8"
+  },
+  {
+    "pergunta": "Quem ganhou a Copa do Mundo de 2002?",
+    "resposta_esperada": "Não há informação sobre isso no manual.",
+    "palavras_chave": ["não há informação"],
+    "pagina": null
+  }
+]
