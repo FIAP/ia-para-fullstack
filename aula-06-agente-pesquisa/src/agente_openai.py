@@ -23,6 +23,13 @@ Responda em português, de forma curta."""
 
 client = OpenAI()
 
+# Cores ANSI para o log ReAct (Thought → Action → Observation) ficar legível na aula.
+CINZA, AZUL, AMARELO, VERDE, RESET = "\033[90m", "\033[94m", "\033[93m", "\033[92m", "\033[0m"
+
+
+def log(rotulo: str, texto: str, cor: str) -> None:
+    print(f"{cor}{rotulo}:{RESET} {texto}")
+
 
 def executar_ferramenta(nome: str, args: dict) -> str:
     if nome not in FUNCOES:
@@ -36,18 +43,28 @@ def executar_ferramenta(nome: str, args: dict) -> str:
 def executar(pergunta: str) -> str:
     msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": pergunta}]
 
-    for _ in range(MAX_PASSOS):
+    for passo in range(1, MAX_PASSOS + 1):
         msg = client.chat.completions.create(model=MODELO, messages=msgs, tools=TOOLS).choices[0].message
+        print(f"{CINZA}── passo {passo} ──{RESET}")
 
         # Sem tool_calls = o modelo terminou e esta é a resposta final.
         if not msg.tool_calls:
+            log("Final Answer", msg.content, VERDE)
             return msg.content
+
+        # Thought: nem todo modelo "pensa em voz alta" antes de pedir a ferramenta.
+        log("Thought", msg.content or "(decidiu usar uma ferramenta)", CINZA)
 
         # O pedido do modelo entra no histórico (a API exige, antes dos resultados).
         msgs.append(msg.model_dump(exclude_none=True))
         for call in msg.tool_calls:
-            args = json.loads(call.function.arguments)
+            try:
+                args = json.loads(call.function.arguments)
+            except json.JSONDecodeError:
+                args = {}
+            log("Action", f"{call.function.name}({args})", AZUL)
             out = executar_ferramenta(call.function.name, args)
+            log("Observation", out[:200], AMARELO)
             # tool_call_id liga o resultado ao pedido: o modelo pode pedir várias de uma vez.
             msgs.append({"role": "tool", "tool_call_id": call.id, "content": out})
 
