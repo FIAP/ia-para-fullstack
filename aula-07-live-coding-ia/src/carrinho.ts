@@ -1,4 +1,8 @@
-// Tipos do domínio e o cálculo do total do carrinho.
+// Tipos do carrinho e o cálculo do total. As regras de cupom ficam em cupons.ts.
+import { calcularDesconto, calcularFrete, validarCupom, type Cupom } from "./cupons";
+
+// Reexporta o tipo para quem já importava Cupom de "./carrinho" continuar funcionando.
+export type { Cupom } from "./cupons";
 
 export interface Item {
   nome: string;
@@ -13,47 +17,17 @@ export interface Carrinho {
   frete: number;
 }
 
-// União discriminada: o campo "tipo" diz qual formato o cupom tem,
-// e o TypeScript obriga a tratar cada caso.
-export type Cupom =
-  | { tipo: "percentual"; valor: number } // ex.: 10 = 10% de desconto nos produtos
-  | { tipo: "valor_fixo"; valor: number } // ex.: 30 = R$ 30 de desconto nos produtos
-  | { tipo: "frete_gratis" };
-
-// Regras de negócio com nome, em vez de "números mágicos" espalhados pelo código.
-const PERCENTUAL_MAXIMO = 50;
-const MINIMO_FRETE_GRATIS = 200;
-
-function validar(carrinho: Carrinho, cupom?: Cupom): void {
+function validarCarrinho(carrinho: Carrinho): void {
   if (carrinho.frete < 0) throw new RangeError("frete não pode ser negativo");
   for (const item of carrinho.itens) {
     if (item.precoUnitario < 0 || item.quantidade < 0) {
       throw new RangeError(`item inválido: ${item.nome}`);
     }
   }
-  if (cupom && cupom.tipo !== "frete_gratis" && cupom.valor < 0) {
-    throw new RangeError("valor do cupom não pode ser negativo");
-  }
 }
 
 function calcularSubtotal(itens: Item[]): number {
   return itens.reduce((soma, item) => soma + item.precoUnitario * item.quantidade, 0);
-}
-
-function calcularDesconto(subtotal: number, cupom?: Cupom): number {
-  if (!cupom) return 0;
-  switch (cupom.tipo) {
-    case "percentual":
-      return (subtotal * Math.min(cupom.valor, PERCENTUAL_MAXIMO)) / 100;
-    case "valor_fixo":
-      return Math.min(cupom.valor, subtotal); // nunca desconta mais do que os produtos valem
-    case "frete_gratis":
-      return 0; // o benefício deste cupom está no frete, não nos produtos
-  }
-}
-
-function calcularFrete(frete: number, subtotal: number, cupom?: Cupom): number {
-  return cupom?.tipo === "frete_gratis" && subtotal > MINIMO_FRETE_GRATIS ? 0 : frete;
 }
 
 function arredondarCentavos(valor: number): number {
@@ -63,7 +37,7 @@ function arredondarCentavos(valor: number): number {
 /**
  * Calcula o total do carrinho aplicando o cupom (se houver).
  *
- * Regras:
+ * Regras (detalhadas em cupons.ts):
  * - percentual: desconto sobre os produtos, limitado a 50%;
  * - valor_fixo: desconto sobre os produtos, nunca maior que o subtotal (o frete continua sendo cobrado);
  * - frete_gratis: zera o frete quando o subtotal dos produtos é MAIOR que R$ 200 (exatamente R$ 200 paga frete).
@@ -74,7 +48,8 @@ function arredondarCentavos(valor: number): number {
  * @throws {RangeError} Se preço, quantidade, frete ou valor do cupom forem negativos
  */
 export function calcularTotal(carrinho: Carrinho, cupom?: Cupom): number {
-  validar(carrinho, cupom);
+  validarCarrinho(carrinho);
+  validarCupom(cupom);
   const subtotal = calcularSubtotal(carrinho.itens);
   const desconto = calcularDesconto(subtotal, cupom);
   const frete = calcularFrete(carrinho.frete, subtotal, cupom);
