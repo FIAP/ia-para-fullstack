@@ -1,20 +1,31 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Chat } from "./components/Chat";
+import { Login } from "./components/Login";
+import { Upload } from "./components/Upload";
+import { token } from "./lib/api";
 
 export function App() {
-  const [status, setStatus] = useState("verificando...");
+  const [usuario, setUsuario] = useState<string | null>(token.obter() ? "você" : null);
 
-  // Etapa 1: só confirma que front e back conversam (via proxy do Vite).
-  useEffect(() => {
-    fetch("/api/health")
-      .then((r) => r.json())
-      .then((d: { ok: boolean }) => setStatus(d.ok ? "API no ar ✅" : "API com problema"))
-      .catch(() => setStatus("API fora do ar ❌ (rode npm run dev em server/)"));
-  }, []);
+  function sair() {
+    token.limpar();
+    setUsuario(null);
+  }
 
   return (
     <main className="app">
-      <h1>Assistente de Documentos</h1>
-      <p>{status}</p>
+      <header className="linha">
+        <h1>Assistente de Documentos</h1>
+        {usuario && <button onClick={sair}>Sair</button>}
+      </header>
+      {usuario ? (
+        <>
+          <Upload />
+          <Chat />
+        </>
+      ) : (
+        <Login aoEntrar={setUsuario} />
+      )}
     </main>
   );
 }
