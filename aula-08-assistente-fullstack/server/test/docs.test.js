@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { criarApp } from "../src/app.js";
 import { FakeAdapter } from "../src/llm/FakeAdapter.js";
 import { criarHistorico } from "../src/services/historico.js";
-import { subir } from "./ajuda.js";
+import { JWT_TESTE, login, subir } from "./ajuda.js";
 
 // RAG falso: guarda os chunks em memória para o teste conferir.
 const indexados = {};
@@ -14,16 +14,18 @@ const ragFalso = {
 };
 
 let api;
+let ana;
 before(async () => {
   const fake = new FakeAdapter();
-  api = await subir(criarApp({ llm: fake, historico: criarHistorico({ llm: fake }), rag: ragFalso }));
+  api = await subir(criarApp({ llm: fake, historico: criarHistorico({ llm: fake }), rag: ragFalso, jwtSecret: JWT_TESTE }));
+  ana = await login(api.url, "ana@exemplo.com", "ana-demo-123");
 });
 after(() => api.server.close());
 
 async function enviarPdf(conteudo, nome = "manual.pdf", tipo = "application/pdf") {
   const form = new FormData();
   form.append("pdf", new Blob([conteudo], { type: tipo }), nome);
-  return fetch(`${api.url}/api/docs`, { method: "POST", body: form });
+  return fetch(`${api.url}/api/docs`, { method: "POST", body: form, headers: ana });
 }
 
 test("indexa o PDF por página na coleção do usuário", async () => {
@@ -31,7 +33,7 @@ test("indexa o PDF por página na coleção do usuário", async () => {
   assert.equal(r.status, 201);
   const corpo = await r.json();
   assert.equal(corpo.paginas, 8);
-  const chunks = indexados.user_demo;
+  const chunks = indexados.user_u1;
   assert.equal(chunks.length, corpo.chunks);
   assert.ok(chunks.some((c) => c.pagina === 2 && c.texto.includes("12 meses")));
 });

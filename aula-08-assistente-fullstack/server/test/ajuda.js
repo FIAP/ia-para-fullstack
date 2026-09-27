@@ -16,3 +16,16 @@ export async function postarSSE(url, caminho, corpo, headers = {}) {
   const texto = dados.filter((d) => d !== "[DONE]").map((d) => JSON.parse(d)).join("");
   return { status: r.status, headers: r.headers, dados, texto, bruto };
 }
+
+export const JWT_TESTE = "segredo-so-para-testes";
+
+// Faz login e devolve o header Authorization pronto para usar.
+export async function login(url, email, senha) {
+  const r = await fetch(`${url}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, senha }),
+  });
+  const { token } = await r.json();
+  return { Authorization: `Bearer ${token}` };
+}
