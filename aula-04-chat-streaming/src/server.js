@@ -1,11 +1,10 @@
-// Passo 1 — servidor mínimo. O .env é carregado antes de qualquer outra coisa.
 import "dotenv/config";
-import express from "express";
+import OpenAI from "openai";
+import { criarApp } from "./app.js";
+import { OpenAIAdapter } from "./llm/OpenAIAdapter.js";
 
-const app = express();
-app.use(express.json());
-
-app.get("/health", (_req, res) => res.json({ ok: true }));
+// Confira os modelos disponíveis na documentação do provedor.
+const llm = new OpenAIAdapter(new OpenAI(), process.env.OPENAI_MODEL ?? "gpt-4.1-mini");
 
 const porta = process.env.PORT ?? 3000;
-app.listen(porta, () => console.log(`Servidor em http://localhost:${porta}`));
+criarApp({ llm }).listen(porta, () => console.log(`Servidor em http://localhost:${porta}`));
