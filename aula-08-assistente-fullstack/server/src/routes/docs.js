@@ -10,7 +10,7 @@ const upload = multer({
   fileFilter: (_req, arquivo, ok) => ok(null, arquivo.mimetype === "application/pdf"),
 });
 
-export function rotaDocs({ rag, auth }) {
+export function rotaDocs({ rag, cache, auth }) {
   const router = Router();
 
   router.post("/docs", auth, upload.single("pdf"), async (req, res) => {
@@ -27,6 +27,8 @@ export function rotaDocs({ rag, auth }) {
     if (chunks.length === 0) return res.status(422).json({ erro: "O PDF não tem texto extraível" });
 
     await rag.indexar(`user_${req.user.id}`, chunks);
+    // Documentos mudaram: invalida o cache de respostas deste usuário.
+    await cache.novaVersaoDocs(req.user.id).catch(() => {});
     res.status(201).json({ arquivo: req.file.originalname, paginas: pages.length, chunks: chunks.length });
   });
 

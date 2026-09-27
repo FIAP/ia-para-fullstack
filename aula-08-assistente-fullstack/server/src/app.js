@@ -4,20 +4,22 @@ import { criarRateLimit } from "./middleware/rateLimit.js";
 import { rotaAuth } from "./routes/auth.js";
 import { rotaChat } from "./routes/chat.js";
 import { rotaDocs } from "./routes/docs.js";
+import { criarCache } from "./services/cache.js";
 
 // O app recebe as dependências por parâmetro: em produção as reais, nos testes as falsas.
 export function criarApp({ llm, historico, rag, jwtSecret, redis, rateLimitPorMinuto = 10 }) {
   const app = express();
   app.use(express.json());
   const auth = criarAuth(jwtSecret);
+  const cache = criarCache({ redis });
 
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
   app.use("/api", rotaAuth({ jwtSecret }));
   // Rotas protegidas: só com token válido. O usuário vem do token, nunca do corpo da requisição.
   // Rate limit só no /chat, que é onde está o custo. auth vem antes: o limite é POR USUÁRIO.
   const limite = criarRateLimit({ redis, limite: rateLimitPorMinuto });
-  app.use("/api", rotaChat({ llm, historico, rag, auth: [auth, limite] }));
-  app.use("/api", rotaDocs({ rag, auth }));
+  app.use("/api", rotaChat({ llm, historico, rag, cache, auth: [auth, limite] }));
+  app.use("/api", rotaDocs({ rag, cache, auth }));
 
   return app;
 }

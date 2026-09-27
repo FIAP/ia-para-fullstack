@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { promptRag } from "../rag/prompt.js";
+import { MENSAGEM_FALLBACK } from "../resiliencia/breaker.js";
 import { calcularCusto } from "../services/custo.js";
 
 // Envia um pedaço no formato Server-Sent Events. JSON.stringify protege as quebras de linha.
@@ -8,7 +9,7 @@ export function enviarSSE(res, dado) {
 }
 
 // Endpoint da Aula 4 (SSE + histórico) + RAG da Aula 5, isolado por usuário.
-export function rotaChat({ llm, historico, rag, auth }) {
+export function rotaChat({ llm, historico, rag, cache, auth }) {
   const router = Router();
 
   router.post("/chat", auth, async (req, res) => {
@@ -21,6 +22,29 @@ export function rotaChat({ llm, historico, rag, auth }) {
     const messages = historico.obter(`${req.user.id}:${sessaoId}`);
     messages.push({ role: "user", content: pergunta });
     await historico.resumirSePreciso(messages);
+
+    // Cache só na PRIMEIRA pergunta da conversa: uma continuação ("e o frete?")
+    // depende do histórico, e a mesma frase pode pedir outra resposta.
+    const primeiraPergunta = messages.filter((m) => m.role === "user").length === 1;
+    let chaveCache = null;
+    if (primeiraPergunta) {
+      try {
+        chaveCache = await cache.chave(req.user.id, pergunta);
+        const guardada = await cache.obter(chaveCache);
+        if (guardada) {
+          // Acerto no cache: responde na hora, sem chamar o LLM, com custo zero.
+          console.log(JSON.stringify({ evento: "chat", usuario: req.user.id, sessaoId, cache: "hit", custoUSD: 0 }));
+          messages.push({ role: "assistant", content: guardada });
+          res.setHeader("Content-Type", "text/event-stream");
+          enviarSSE(res, guardada);
+          enviarSSE(res, "[DONE]");
+          return res.end();
+        }
+      } catch (e) {
+        console.warn("[cache] Redis indisponível, seguindo sem cache:", e.message);
+        chaveCache = null;
+      }
+    }
 
     // RAG: busca SÓ na coleção do usuário logado.
     const trechos = await rag.buscar(`user_${req.user.id}`, pergunta, 4);
@@ -50,6 +74,7 @@ export function rotaChat({ llm, historico, rag, auth }) {
     };
 
     let resposta = "";
+    let deuErro = false;
     try {
       for await (const token of llm.stream(paraOModelo, { aoFinalizar })) {
         if (clienteSaiu) break;
@@ -57,10 +82,15 @@ export function rotaChat({ llm, historico, rag, auth }) {
         enviarSSE(res, token);
       }
     } catch (erro) {
+      deuErro = true;
       console.error("Erro no stream:", erro.message);
       enviarSSE(res, "\n[erro ao gerar a resposta]");
     }
     if (resposta) messages.push({ role: "assistant", content: resposta });
+    // Só cacheia resposta completa e "de verdade": nunca erro, fallback ou resposta interrompida.
+    if (chaveCache && resposta && !deuErro && !clienteSaiu && resposta !== MENSAGEM_FALLBACK) {
+      await cache.salvar(chaveCache, resposta).catch(() => {});
+    }
 
     enviarSSE(res, "[DONE]");
     res.end();
