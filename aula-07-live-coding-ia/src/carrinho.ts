@@ -19,3 +19,8 @@ export type Cupom =
   | { tipo: "percentual"; valor: number } // ex.: 10 = 10% de desconto nos produtos
   | { tipo: "valor_fixo"; valor: number } // ex.: 30 = R$ 30 de desconto nos produtos
   | { tipo: "frete_gratis" };
+
+// Passo 4 (Red): só a assinatura, para os testes compilarem e FALHAREM.
+export function calcularTotal(_carrinho: Carrinho, _cupom?: Cupom): number {
+  throw new Error("não implementado");
+}
