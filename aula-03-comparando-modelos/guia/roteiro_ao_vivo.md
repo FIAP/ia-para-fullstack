@@ -29,3 +29,11 @@ MODELO=chatgpt npm test
 - Cole o **mesmo** prompt. Anote o tempo.
 - Mostre o **Artifacts**: o código aparece num painel ao lado da conversa, pronto para copiar ou baixar.
 - Salve em `avaliacao-ts/respostas/claude/` e rode `MODELO=claude npm test`.
+
+## Passo 5 · Gemini
+
+- Abra https://gemini.google.com, conversa nova, e anote o modelo.
+- Cole o **mesmo** prompt. Anote o tempo.
+- Opcional, se fizer sentido para a turma: mostre o Gemini lendo um arquivo do Google Drive
+  (clique em **+** → **Drive** e peça, por exemplo, para revisar um documento de especificação).
+- Salve em `avaliacao-ts/respostas/gemini/` e rode `MODELO=gemini npm test`.
