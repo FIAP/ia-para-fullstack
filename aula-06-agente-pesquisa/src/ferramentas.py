@@ -125,6 +125,19 @@ FUNCOES = {
 ACOES_DE_ESCRITA = {"enviar_email"}
 
 
+def problemas_nos_args(nome: str, args: dict) -> list[str]:
+    """Compara os argumentos pedidos pelo modelo com o JSON Schema da ferramenta.
+
+    Serve para medir se o modelo "inventou" parâmetros (passo 9).
+    """
+    schema = next((t["function"]["parameters"] for t in TOOLS if t["function"]["name"] == nome), None)
+    if schema is None:
+        return [f"ferramenta inexistente: {nome}"]
+    faltando = [c for c in schema["required"] if c not in args]
+    inventados = [c for c in args if c not in schema["properties"]]
+    return [f"faltou {c}" for c in faltando] + [f"inventou {c}" for c in inventados]
+
+
 if __name__ == "__main__":
     print(search_web("cotação do dólar hoje"))
     print(consultar_banco("SELECT estado, COUNT(*) FROM clientes GROUP BY estado ORDER BY 2 DESC"))

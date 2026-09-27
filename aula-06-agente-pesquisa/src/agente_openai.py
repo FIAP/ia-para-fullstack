@@ -11,7 +11,7 @@ import sys
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from ferramentas import ACOES_DE_ESCRITA, FUNCOES, TOOLS
+from ferramentas import ACOES_DE_ESCRITA, FUNCOES, TOOLS, problemas_nos_args
 
 load_dotenv()
 MODELO = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")  # confira os modelos disponíveis na documentação do provedor
@@ -33,8 +33,12 @@ client = OpenAI()
 CINZA, AZUL, AMARELO, VERDE, RESET = "\033[90m", "\033[94m", "\033[93m", "\033[92m", "\033[0m"
 
 
+VERBOSO = True  # o metricas.py desliga o log para mostrar só a tabela
+
+
 def log(rotulo: str, texto: str, cor: str) -> None:
-    print(f"{cor}{rotulo}:{RESET} {texto}")
+    if VERBOSO:
+        print(f"{cor}{rotulo}:{RESET} {texto}")
 
 
 def aprovado_pelo_usuario(nome: str, args: dict) -> bool:
@@ -60,17 +64,27 @@ def executar_ferramenta(nome: str, args: dict) -> str:
         return f"Erro: parâmetros inválidos para {nome}: {e}"
 
 
-def executar(pergunta: str) -> str:
+def executar(pergunta: str) -> dict:
+    """Roda o agente e devolve a resposta + métricas do processo (passo 9)."""
     msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": pergunta}]
+    resultado = {"resposta": None, "modelo": MODELO, "passos": 0, "ferramentas": [],
+                 "problemas_args": [], "tokens_entrada": 0, "tokens_saida": 0}
 
     for passo in range(1, MAX_PASSOS + 1):
-        msg = client.chat.completions.create(model=MODELO, messages=msgs, tools=TOOLS).choices[0].message
-        print(f"{CINZA}── passo {passo} ──{RESET}")
+        r = client.chat.completions.create(model=MODELO, messages=msgs, tools=TOOLS)
+        msg = r.choices[0].message
+        resultado["passos"] = passo
+        # Cada volta do loop é uma chamada paga: somamos os tokens de todas.
+        resultado["tokens_entrada"] += r.usage.prompt_tokens
+        resultado["tokens_saida"] += r.usage.completion_tokens
+        if VERBOSO:
+            print(f"{CINZA}── passo {passo} ──{RESET}")
 
         # Sem tool_calls = o modelo terminou e esta é a resposta final.
         if not msg.tool_calls:
             log("Final Answer", msg.content, VERDE)
-            return msg.content
+            resultado["resposta"] = msg.content
+            return resultado
 
         # Thought: nem todo modelo "pensa em voz alta" antes de pedir a ferramenta.
         log("Thought", msg.content or "(decidiu usar uma ferramenta)", CINZA)
@@ -83,13 +97,16 @@ def executar(pergunta: str) -> str:
             except json.JSONDecodeError:
                 args = {}
             log("Action", f"{call.function.name}({args})", AZUL)
+            resultado["ferramentas"].append(call.function.name)
+            resultado["problemas_args"] += problemas_nos_args(call.function.name, args)
             out = executar_ferramenta(call.function.name, args)
             log("Observation", out[:200], AMARELO)
             # Delimitamos o resultado: junto com a regra no SYSTEM, o modelo sabe que é dado, não ordem.
             # tool_call_id liga o resultado ao pedido: o modelo pode pedir várias de uma vez.
             msgs.append({"role": "tool", "tool_call_id": call.id, "content": f"<tool_result>{out}</tool_result>"})
 
-    return "Não consegui concluir dentro do limite de passos."
+    resultado["resposta"] = "Não consegui concluir dentro do limite de passos."
+    return resultado
 
 
 # Três cenários de decisão: cada pergunta pede uma escolha diferente.
