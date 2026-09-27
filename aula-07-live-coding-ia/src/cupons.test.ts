@@ -1,7 +1,7 @@
 import { calcularDesconto, calcularFrete, validarCupom } from "./cupons";
 
 describe("validarCupom", () => {
-  test("aceita cupom sem cupom e frete grátis", () => {
+  test("aceita ausência de cupom e cupom de frete grátis", () => {
     expect(() => validarCupom()).not.toThrow();
     expect(() => validarCupom({ tipo: "frete_gratis" })).not.toThrow();
   });
