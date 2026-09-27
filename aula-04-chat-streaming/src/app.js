@@ -1,4 +1,5 @@
 import express from "express";
+import { calcularCusto } from "./custo.js";
 
 // O app recebe o llm por parâmetro (injeção de dependência):
 // em produção passamos o adapter real; nos testes, um FakeAdapter.
@@ -25,8 +26,22 @@ export function criarApp({ llm }) {
     let clienteSaiu = false;
     res.on("close", () => { clienteSaiu = !res.writableEnded; });
 
+    const inicio = Date.now();
+    // Log estruturado (uma linha JSON por chamada): fácil de filtrar e somar depois.
+    // Cuidado com dados pessoais: logamos só o começo da pergunta.
+    const aoFinalizar = ({ modelo, entrada, saida }) => {
+      console.log(JSON.stringify({
+        evento: "chat",
+        pergunta: String(messages.at(-1)?.content ?? "").slice(0, 80),
+        ms: Date.now() - inicio,
+        modelo,
+        tokens: { entrada, saida },
+        custoUSD: calcularCusto(modelo, { entrada, saida }),
+      }));
+    };
+
     try {
-      for await (const token of llm.stream(messages)) {
+      for await (const token of llm.stream(messages, { aoFinalizar })) {
         if (clienteSaiu) break;
         // JSON.stringify protege quebras de linha dentro do token, que quebrariam o SSE.
         res.write(`data: ${JSON.stringify(token)}\n\n`);
