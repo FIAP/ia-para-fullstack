@@ -7,6 +7,8 @@ Uso: python src/metricas.py              (OpenAI)
 """
 import sys
 
+import comum
+
 # Preços em US$ por 1 milhão de tokens: (entrada, saída).
 # Confira na página oficial antes da aula: preços mudam com frequência.
 PRECOS = {
@@ -37,7 +39,7 @@ if __name__ == "__main__":
         import agente_anthropic as agente
     else:
         import agente_openai as agente
-    agente.VERBOSO = False
+    comum.VERBOSO = False
 
     print(f"{'Pergunta':<34} {'Esperada':<16} {'Usou':<18} {'Certa?':<7} {'Passos':<7} {'Tokens':<12} {'Args':<10} Custo")
     for pergunta, esperada in CASOS:
