@@ -141,7 +141,7 @@ def main():
 
     tabela = tabulate(linhas, headers=["Provedor", "Modelo", "Tempo", "Tokens entrada", "Tokens saída",
                                            "US$/chamada", "US$/1.000"],
-                      tablefmt="github")
+                      tablefmt="github", disable_numparse=True)  # mostra 0.000074, não 7.4e-05
     print("\n" + tabela)
     (pasta / "resumo.md").write_text(f"# {arquivo.name}\n\n{tabela}\n", encoding="utf-8")
     print(f"\nRespostas e resumo em {pasta}/")
