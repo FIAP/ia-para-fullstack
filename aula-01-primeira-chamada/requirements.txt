@@ -1,0 +1,5 @@
+openai>=1.50
+anthropic>=0.40
+python-dotenv>=1.0
+numpy>=1.26
+tiktoken>=0.7
