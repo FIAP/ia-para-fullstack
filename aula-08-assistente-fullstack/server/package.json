@@ -22,6 +22,8 @@
     "multer": "^2.4.0",
     "openai": "^7.23.0",
     "opossum": "^10.0.0",
-    "pdf-parse": "^2.4.5"
+    "pdf-parse": "^2.4.5",
+    "pino": "^10.3.1",
+    "prom-client": "^15.1.3"
   }
 }

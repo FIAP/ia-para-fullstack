@@ -3,6 +3,8 @@
 // quem guarda a conversa e reenvia a cada pergunta é o nosso servidor.
 // Em produção isso iria para um Redis/banco com expiração (Aula 8).
 
+import { logger } from "../observabilidade/logger.js";
+
 export const PROMPT_SISTEMA = "Você é um assistente técnico. Responda em português, de forma clara e direta.";
 
 export function criarHistorico({ llm, limite = 20, manterRecentes = 6 } = {}) {
@@ -35,7 +37,7 @@ export function criarHistorico({ llm, limite = 20, manterRecentes = 6 } = {}) {
       }])) resumo += t;
     } catch (e) {
       // Se o resumo falhar, seguimos com o histórico completo: tentamos de novo na próxima.
-      console.warn("[historico] não foi possível resumir:", e.message);
+      logger.warn({ erro: e.message }, "histórico: não foi possível resumir");
       return;
     }
 
@@ -45,7 +47,7 @@ export function criarHistorico({ llm, limite = 20, manterRecentes = 6 } = {}) {
       { role: "system", content: `Resumo da conversa até aqui: ${resumo}` },
       ...recentes,
     );
-    console.log(`[historico] ${antigas.length} mensagens antigas resumidas`);
+    logger.info({ evento: "resumo", mensagens: antigas.length }, "histórico resumido");
   }
 
   return { obter, resumirSePreciso };

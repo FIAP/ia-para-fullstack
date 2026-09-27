@@ -1,16 +1,20 @@
 import { Router } from "express";
+import { logger } from "../observabilidade/logger.js";
+import { metricas } from "../observabilidade/metricas.js";
 import { promptRag } from "../rag/prompt.js";
 import { MENSAGEM_FALLBACK } from "../resiliencia/breaker.js";
 import { calcularCusto } from "../services/custo.js";
 
 // Envia um pedaço no formato Server-Sent Events. JSON.stringify protege as quebras de linha.
 export function enviarSSE(res, dado) {
-  res.write(`data: ${typeof dado === "string" && dado === "[DONE]" ? dado : JSON.stringify(dado)}\n\n`);
+  res.write(`data: ${dado === "[DONE]" ? dado : JSON.stringify(dado)}\n\n`);
 }
 
 // Endpoint da Aula 4 (SSE + histórico) + RAG da Aula 5, isolado por usuário.
 export function rotaChat({ llm, historico, rag, cache, auth }) {
   const router = Router();
+  // Custo acumulado por conversa (em memória, como o histórico): vai no log de cada resposta.
+  const custoPorConversa = new Map();
 
   router.post("/chat", auth, async (req, res) => {
     const { sessaoId, pergunta } = req.body ?? {};
@@ -19,9 +23,12 @@ export function rotaChat({ llm, historico, rag, cache, auth }) {
     }
 
     // A chave inclui o usuário: ninguém lê a conversa de outro adivinhando o sessaoId.
-    const messages = historico.obter(`${req.user.id}:${sessaoId}`);
+    const conversa = `${req.user.id}:${sessaoId}`;
+    const messages = historico.obter(conversa);
     messages.push({ role: "user", content: pergunta });
     await historico.resumirSePreciso(messages);
+    const log = logger.child({ evento: "chat", usuario: req.user.id, sessaoId });
+    const cronometro = metricas.duracao.startTimer();
 
     // Cache só na PRIMEIRA pergunta da conversa: uma continuação ("e o frete?")
     // depende do histórico, e a mesma frase pode pedir outra resposta.
@@ -33,7 +40,9 @@ export function rotaChat({ llm, historico, rag, cache, auth }) {
         const guardada = await cache.obter(chaveCache);
         if (guardada) {
           // Acerto no cache: responde na hora, sem chamar o LLM, com custo zero.
-          console.log(JSON.stringify({ evento: "chat", usuario: req.user.id, sessaoId, cache: "hit", custoUSD: 0 }));
+          log.info({ cache: "hit", custoUSD: 0 }, "resposta do cache");
+          metricas.requisicoes.inc({ origem: "cache" });
+          cronometro();
           messages.push({ role: "assistant", content: guardada });
           res.setHeader("Content-Type", "text/event-stream");
           enviarSSE(res, guardada);
@@ -41,7 +50,7 @@ export function rotaChat({ llm, historico, rag, cache, auth }) {
           return res.end();
         }
       } catch (e) {
-        console.warn("[cache] Redis indisponível, seguindo sem cache:", e.message);
+        log.warn({ erro: e.message }, "Redis indisponível, seguindo sem cache");
         chaveCache = null;
       }
     }
@@ -67,10 +76,18 @@ export function rotaChat({ llm, historico, rag, cache, auth }) {
 
     const inicio = Date.now();
     const aoFinalizar = ({ modelo, entrada, saida }) => {
-      console.log(JSON.stringify({
-        evento: "chat", usuario: req.user.id, sessaoId, trechos: trechos.length, ms: Date.now() - inicio, modelo,
-        tokens: { entrada, saida }, custoUSD: calcularCusto(modelo, { entrada, saida }),
-      }));
+      const custo = calcularCusto(modelo, { entrada, saida }) ?? 0;
+      const custoConversa = (custoPorConversa.get(conversa) ?? 0) + custo;
+      custoPorConversa.set(conversa, custoConversa);
+
+      metricas.requisicoes.inc({ origem: "llm" });
+      metricas.tokens.inc({ modelo, tipo: "entrada" }, entrada);
+      metricas.tokens.inc({ modelo, tipo: "saida" }, saida);
+      metricas.custo.inc({ modelo }, custo);
+      log.info({
+        trechos: trechos.length, ms: Date.now() - inicio, modelo, tokens: { entrada, saida },
+        custoUSD: custo, custoConversaUSD: Number(custoConversa.toFixed(8)),
+      }, "resposta do LLM");
     };
 
     let resposta = "";
@@ -83,9 +100,10 @@ export function rotaChat({ llm, historico, rag, cache, auth }) {
       }
     } catch (erro) {
       deuErro = true;
-      console.error("Erro no stream:", erro.message);
+      log.error({ erro: erro.message }, "erro no stream");
       enviarSSE(res, "\n[erro ao gerar a resposta]");
     }
+    cronometro();
     if (resposta) messages.push({ role: "assistant", content: resposta });
     // Só cacheia resposta completa e "de verdade": nunca erro, fallback ou resposta interrompida.
     if (chaveCache && resposta && !deuErro && !clienteSaiu && resposta !== MENSAGEM_FALLBACK) {

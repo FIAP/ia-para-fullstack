@@ -15,4 +15,6 @@ export const config = {
   rateLimitPorMinuto: Number(process.env.RATE_LIMIT_POR_MINUTO ?? 10),
   // Pasta com o build do React. Em produção (Docker) o próprio Express serve o front.
   webDir: process.env.WEB_DIR,
+  // Opcional: protege /api/metrics com um token (recomendado em produção).
+  metricsToken: process.env.METRICS_TOKEN,
 };

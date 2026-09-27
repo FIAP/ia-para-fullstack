@@ -1,4 +1,5 @@
 import CircuitBreaker from "opossum";
+import { logger } from "../observabilidade/logger.js";
 
 export const MENSAGEM_FALLBACK = "Serviço indisponível, tente em instantes.";
 
@@ -30,9 +31,9 @@ export function comCircuitBreaker(llm, opcoes = {}) {
     primeiro: { done: false, value: MENSAGEM_FALLBACK },
     resto: [],
   }));
-  breaker.on("open", () => console.warn("[breaker] ABERTO: respondendo com fallback"));
-  breaker.on("halfOpen", () => console.warn("[breaker] MEIO-ABERTO: testando o provedor"));
-  breaker.on("close", () => console.warn("[breaker] FECHADO: provedor normalizado"));
+  breaker.on("open", () => logger.warn({ evento: "breaker", estado: "aberto" }, "respondendo com fallback"));
+  breaker.on("halfOpen", () => logger.warn({ evento: "breaker", estado: "meio-aberto" }, "testando o provedor"));
+  breaker.on("close", () => logger.info({ evento: "breaker", estado: "fechado" }, "provedor normalizado"));
 
   return {
     breaker,
