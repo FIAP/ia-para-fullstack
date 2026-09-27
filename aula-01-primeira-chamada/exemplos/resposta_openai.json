@@ -1,0 +1,13 @@
+{
+  "id": "chatcmpl-exemplo",
+  "object": "chat.completion",
+  "model": "gpt-4.1-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": { "role": "assistant", "content": "Olá! Como posso ajudar você hoje?" },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 9, "completion_tokens": 12, "total_tokens": 21 }
+}
