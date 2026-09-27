@@ -1,4 +1,3 @@
-# Código com problemas DE PROPÓSITO: é o alvo do code review da aula.
 import sqlite3
 
 
